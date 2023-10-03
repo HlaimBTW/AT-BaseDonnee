@@ -1,0 +1,176 @@
+CREATE TABLE
+    DEPARTEMENT (
+        NUM_DEP VARCHAR(2) PRIMARY KEY,
+        NOM_DEP VARCHAR(20)
+    );
+
+CREATE TABLE
+    SALLE (
+        NUM_S VARCHAR(3) PRIMARY KEY,
+        NOM_S VARCHAR(10),
+        NUM_DEP VARCHAR(2),
+        CONSTRAINT fk_NUM_DEP FOREIGN KEY (NUM_DEP) REFERENCES DEPARTEMENT (NUM_DEP)
+    );
+
+CREATE TABLE
+    POSTE (
+        NUM_P VARCHAR(3),
+        NOM_P VARCHAR(10),
+        NUM_S VARCHAR(3),
+        CONSTRAINT fk_NUM_S FOREIGN KEY (NUM_S) REFERENCES SALLE (NUM_S)
+    );
+
+CREATE TABLE
+    LOGICIEL (
+        NUM_L VARCHAR(5) PRIMARY KEY,
+        NOM_L VARCHAR(15),
+        DATE_ACH DATE,
+        VERSION VARCHAR(7),
+        DATE_INS DATE
+    );
+
+ALTER TABLE DEPARTEMENT
+ADD COLUMN DATE_CRE DATE DEFAULT '1995-01-01';
+
+ALTER TABLE DEPARTEMENT
+ADD COLUMN NB NUMBER (3) NOT NULL;
+
+ALTER TABLE DEPARTEMENT
+RENAME COLUMN NB TO CAPACITE_Max;
+
+ALTER TABLE LOGICIEL
+ADD COLUMN RELEASE VARCHAR(10);
+
+ALTER TABLE SALLE
+ALTER COLUMN NOM_S
+SET
+    DATA TYPE VARCHAR(30);
+
+CREATE TABLE
+    TYPE (TYP_LP VARCHAR(6), NOM_TYPE VARCHAR(20));
+
+ALTER TABLE LOGICIEL
+DROP COLUMN RELEASE;
+
+ALTER TABLE TYPE ADD PRIMARY KEY (TYP_LP);
+
+ALTER TABLE LOGICIEL
+ADD COLUMN TYP_LP VARCHAR(6);
+
+ALTER TABLE POSTE
+ADD COLUMN TYP_LP VARCHAR(6);
+
+ALTER TABLE LOGICIEL ADD CONSTRAINT fk_LOGICIEL_TYP_LP FOREIGN KEY (TYP_LP) REFERENCES TYPE (TYP_LP);
+
+ALTER TABLE POSTE ADD CONSTRAINT fk_POSTE_TYP_LP FOREIGN KEY (TYP_LP) REFERENCES TYPE (TYP_LP);
+
+CREATE TABLE
+    DEP AS
+SELECT
+    *
+FROM
+    DEPARTEMENT;
+
+ALTER TABLE DEP
+RENAME TO DEP1;
+
+ALTER TABLE DEP1 ADD CONSTRAINT chk_CAPACITE_Max CHECK (CAPACITE_Max < 5000);
+
+ALTER TABLE DEP1 ADD CONSTRAINT uq_Nom_DEP UNIQUE (Nom_DEP);
+
+DROP TABLE DEP1;
+
+INSERT INTO
+    DEPARTEMENT (NUM_DEP, NOM_DEP)
+VALUES
+    ('D1', 'Informatique'),
+    ('D2', 'Gestion'),
+    ('D3', 'Génie civil');
+
+INSERT INTO
+    SALLE (NUM_S, NOM_S, NUM_DEP)
+VALUES
+    ('S01', 'Salle1', 'D1'),
+    ('S02', 'Salle2', 'D1'),
+    ('S03', 'Salle3', 'D1'),
+    ('S11', 'Salle11', 'D2'),
+    ('S12', 'Salle12', 'D2'),
+    ('S21', 'Salle21', 'D3');
+
+INSERT INTO
+    POSTE (NUM_P, NOM_P, NUM_S)
+VALUES
+    ('P1', 'Poste1', 'S01'),
+    ('P2', 'Poste2', 'S01'),
+    ('P3', 'Poste3', 'S02'),
+    ('P4', 'Poste4', 'S03'),
+    ('P5', 'Poste5', 'S11'),
+    ('P6', 'Poste6', 'S11'),
+    ('P7', 'Poste7', 'S12'),
+    ('P8', 'Poste8', 'S12'),
+    ('P9', 'Poste9', 'S21');
+
+INSERT INTO
+    LOGICIEL (NUM_L, NOM_L, DATE_ACH, VERSION)
+VALUES
+    ('LOG1', 'Oracle7', '2000-05-13', '7.3.2'),
+    ('LOG2', 'Oracle8', '2000-05-15', '8.0'),
+    ('LOG3', 'Sql server', '2003-04-12', '7'),
+    ('LOG4', 'Front page', '2003-06-03', '5'),
+    ('LOG5', 'Open office', '2002-06-03', '5'),
+    ('LOG6', 'sql *Plus', '2003-06-03', '2.0'),
+    ('LOG7', 'Office98', '2003-06-03', '98');
+
+INSERT INTO
+    INSTALLER (NUM_P, NUM_L, DATE_INS)
+VALUES
+    ('P1', 'LOG1', '2000-05-15'),
+    ('P1', 'LOG3', '2003-05-01'),
+    ('P2', 'LOG5', '2002-06-05'),
+    ('P2', 'LOG7', '2000-07-15'),
+    ('P3', 'LOG5', '2000-07-16'),
+    ('P4', 'LOG1', '2000-05-15'),
+    ('P5', 'LOG7', '2000-08-15'),
+    ('P5', 'LOG1', '2000-05-19'),
+    ('P5', 'LOG4', '2003-05-13'),
+    ('P7', 'LOG1', '2009-05-13');
+
+INSERT INTO
+    TYPE (TYP_LP, NOM_TYPE)
+VALUES
+    ('TX', 'Terminal x_window'),
+    ('UNIX', 'Système Unix'),
+    ('PCNT', 'Pc Windows NT'),
+    ('PCWS', 'Pc Windows 98'),
+    ('NC', 'Network computer'),
+    ('UB', 'Pc ubunto');
+
+UPDATE POSTE
+SET
+    TYP_LP = 'TX'
+WHERE
+    NUM_P IN ('P1', 'P4');
+
+UPDATE POSTE
+SET
+    TYP_LP = 'NC'
+WHERE
+    NUM_P IN ('P8', 'P9');
+
+UPDATE POSTE
+SET
+    TYP_LP = 'PCNET'
+WHERE
+    NUM_P = 'P3';
+
+UPDATE POSTE
+SET
+    TYP_LP = 'UNIX'
+WHERE
+    NUM_P IN ('P6', 'P2');
+
+UPDATE LOGICIEL
+SET
+    TYP_LP = 'UNIX'
+WHERE
+    NUM_L IN ('LOG1', 'LOG2', 'LOG4', 'LOG5');
